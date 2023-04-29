@@ -1,0 +1,26 @@
+invoices 
+invoice_items
+customers
+invoice_items
+
+invoiuces:
+ id
+ date
+ invoice_number
+ total_amount
+ payment_status
+ parent_id
+ custommer_id
+ 
+
+invoice_items
+id
+invoice_id
+item_name
+single_price
+total_price
+
+customers
+id
+name
+telephone
