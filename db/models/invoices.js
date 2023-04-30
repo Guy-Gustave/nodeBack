@@ -18,7 +18,7 @@ class Invoices extends Model {
             },
             items: {
                 relation: Model.HasManyRelation,
-                modelClass: items,
+                modelClass: Items,
                 join: {
                     from: 'invoices.id',
                     to: 'items.id'

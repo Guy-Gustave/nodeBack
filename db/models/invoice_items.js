@@ -2,7 +2,7 @@ const { Model } = require('objection');
 
 class Invoices_items extends Model {
     static get tableName() {
-        return 'invoices_items';
+        return 'invoice_items';
     }
     // static relationMappings = {
     //     invoices: {
