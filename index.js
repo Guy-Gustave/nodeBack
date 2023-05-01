@@ -3,6 +3,7 @@ const Koa = require('koa');
 const koaRoute = require('koa-router');
 const json = require('koa-json');
 const parser = require('koa-bodyparser');
+const cors = require('@koa/cors');
 
 const dbSetup = require('./db/db-setup');
 const customersRoutes = require('./routes/customer_routes')
@@ -19,35 +20,14 @@ const app = new Koa();
 app.use(parser())
 app.use(json());
 
+const options = {
+    origin: 'http://localhost:4200',
+    }
+app.use(cors({options}))
+
 const router = new koaRoute()
 
-// app.use(async ctx => {
-//     ctx.body = 'Hello World';
-//   });
 
-
-
-// router.post('/customers', (ctx, next) => {
-// 	if (
-// 		!ctx.request.body.id ||
-// 		!ctx.request.body.name ||
-// 		!ctx.request.body.telephone 
-// 	) {
-// 		ctx.response.status = 400;
-// 		ctx.body = 'Please enter the data';
-// 	} else {
-// 		let customer = customers.push({
-// 			// id: ctx.request.body.id,
-// 			iname: ctx.request.body.iname,
-// 			price: ctx.request.body.telephone
-// 		});
-// 		ctx.response.status = 201;
-// 		ctx.body = `New customer added with id: ${ctx.request.body.id} & customer name: ${
-// 			ctx.request.body.name
-// 		}`;
-// 	}
-// 	next();
-// });
 app.use(customersRoutes.routes());
 app.use(itemsRoutes.routes());
 app.use(invoiceRoutes.routes());
