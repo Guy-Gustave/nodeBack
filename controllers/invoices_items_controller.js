@@ -5,6 +5,7 @@ const Invoices_items = require('../db/models/invoice_items');
 const getInvoices_items = async ctx => {
     try {
         const foundInvoices_items = await Invoices_items.query();
+        
         ctx.body = {
             message: 'customer Created!',
             data: foundInvoices_items
@@ -15,6 +16,15 @@ const getInvoices_items = async ctx => {
         ctx.status = 500;
     }
 };
+
+// async function getTotalAmountByInvoiceId(invoiceId) {
+//     const result = await knex('invoice_items')
+//       .select('invoice_id')
+//       .sum('total_price as total_amount')
+//       .where('invoice_id', invoiceId)
+//       .groupBy('invoice_id');
+//     return result[0].total_amount;
+//   }
 
 //@desc  Post client 
 //@routes post /api/Invoices_items
