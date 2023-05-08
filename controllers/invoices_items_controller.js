@@ -36,18 +36,16 @@ const postInvoices_items = async (ctx) => {
             item_id: item_id,
             quantity: quantity,
             unit_price: unit_price,
-            total_price: total_price
+            total_price: unit_price * quantity
         });
         ctx.body = {
-            message: 'invoices_items Created!',
-            data: {
-                invoice_id,
-                item_id,
-                quantity,
-                unit_price,
-                total_price
-            }
-        }
+            message: 'customer Created!',
+            data: item_id,
+            quantity,
+            unit_price,
+            total_price
+        };
+        
         ctx.status = 201;
     } catch (err) {
         ctx.status = 500;
@@ -55,4 +53,41 @@ const postInvoices_items = async (ctx) => {
     }
 };
 
-module.exports = { getInvoices_items, postInvoices_items };
+const getInvoiceItemDetails = async ctx => {
+    try {
+        const invId = ctx.params.id
+        console.log('invoiceItem_id', invId)
+        const result = await Invoices_items.query()
+            .select('Invoices_items.*', )
+            .where('invoices_items.id', invId)
+            // .first();
+            console.log('invoiceItem_id', result)
+        // return result;
+        ctx.body = {
+            message: 'invoice details!',
+            data: result
+
+        };
+        ctx.status = 200;
+    } catch (err) {
+        ctx.body = err.message
+        ctx.status = 500;
+
+    }
+}
+
+const updateInvoiceItem = async (ctx) => {
+    try {
+        const invoiceItemID = ctx.params.id
+        const updatedData = ctx.request.body;
+        const result = await Invoices_items.query()
+        .where('id', invoiceItemID)
+        .update(updatedData);
+        
+        
+    } catch (error) {
+        ctx.body = error.message
+    }
+};
+
+module.exports = { getInvoices_items, postInvoices_items, updateInvoiceItem, getInvoiceItemDetails };
