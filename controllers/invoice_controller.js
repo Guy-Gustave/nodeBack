@@ -196,10 +196,95 @@ const deleteInvoice = async (ctx) => {
   }
 };
 
+const splitInvoice = async (ctx) => {
+  const id = ctx.params.id;
+  const { clients } = ctx.request.body;
+
+  try {
+    // Start a transaction
+    await transaction(Invoices.knex(), async (trx) => {
+      // Get the original invoice
+      const originalInvoice = await Invoices.query(trx).findById(id);
+
+      // Delete all existing invoice_items for this invoice
+      // await Invoices_items.query(trx).delete().where("invoice_id", id);
+
+      // Loop through the clients and create new invoices
+      const newInvoices = [];
+      for (const client of clients) {
+        const { customer_name, items } = client;
+
+        const uniqueId = (length = 8) => {
+          return parseInt(
+            Math.ceil(Math.random() * Date.now())
+              .toPrecision(length)
+              .toString()
+              .replace(".", "")
+          );
+        };
+        const def = uniqueId();
+
+        // Create the new invoice
+        const newInvoice = await Invoices.query(trx).insert({
+          customer_name,
+          number: def,
+          total_amount: 0,
+        });
+
+        // Loop through the items and create invoice_items for the new invoice
+        for (const item of items) {
+          const { item_id, quantity } = item;
+
+          // Get the item
+          const dbItem = await Items.query(trx).findById(item_id);
+
+          // Calculate the total price
+          if (!dbItem) {
+            throw new Error(`Item with id ${item_id} not found`);
+          }
+          // Calculate the total price for this item
+          const unit_price = dbItem.sale_price;
+          const total_price = unit_price * quantity;
+          console.log('total_price: ', total_price);
+
+          // Create the invoice_item for the new invoice
+          await Invoices_items.query(trx).insert({
+            invoice_id: newInvoice.id,
+            item_id,
+            quantity,
+            unit_price: dbItem.sale_price,
+            total_price,
+          });
+
+          // Update the total amount of the new invoice
+          newInvoice.total_amount += total_price;
+        }
+
+        // Update the total amount of the original invoice
+        originalInvoice.total_amount -= newInvoice.total_amount;
+
+        // Update the original invoice with the new total amount
+        await originalInvoice.$query(trx).patch({ total_amount: originalInvoice.total_amount });
+
+        // Add the new invoice to the response
+        newInvoices.push(newInvoice);
+      }
+
+      ctx.status = 200;
+      ctx.body = { message: 'Invoice split successfully', invoices: newInvoices };
+    });
+  } catch (error) {
+    console.error(error);
+    ctx.status = 500;
+    ctx.body = { message: 'Internal server error' };
+  }
+};
+
 module.exports = {
   getInvoices,
   postInvoices,
   getInvoiceDetails,
   updateInvoice,
   deleteInvoice,
+  splitInvoice,
 };
